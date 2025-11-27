@@ -52,7 +52,7 @@ typedef BlocEffectListenerCondition<E> = bool Function(E effect);
 
 /// {@template bloc_effect_listener}
 /// Takes a [BlocEffectWidgetListener] and an optional [bloc] and invokes
-/// the [listener] in response to effect emissions from the [bloc].
+/// the [listener] in response to effect emissions from the [bloc] or [Cubit].
 ///
 /// It should be used for functionality that needs to occur only in response to
 /// an effect such as navigation, showing a `SnackBar`, showing a `Dialog`, etc.
@@ -60,7 +60,7 @@ typedef BlocEffectListenerCondition<E> = bool Function(E effect);
 /// If the [bloc] parameter is omitted, [BlocEffectListener] will automatically
 /// perform a lookup using [BlocProvider] and the current [BuildContext].
 ///
-/// Only specify the [bloc] if you wish to provide a [bloc] that is otherwise
+/// Only specify the [bloc] if you wish to provide a [bloc] or [Cubit] that is otherwise
 /// not accessible via [BlocProvider] and the current [BuildContext].
 ///
 /// ```dart
@@ -95,7 +95,7 @@ class BlocEffectListener<B extends BlocEffectEmitter<dynamic, E>, E>
 }
 
 /// Base class for widgets that listen to effect emissions from a specified
-/// [Bloc] which mixes in the `BlocEffectEmitter` mixin.
+/// [Bloc] or [Cubit] which mixes in the `BlocEffectEmitter` mixin.
 ///
 /// A [BlocEffectListenerBase] is stateful and maintains the effect
 /// subscription.
@@ -113,7 +113,7 @@ abstract class BlocEffectListenerBase<B extends BlocEffectEmitter<dynamic, E>,
   /// [BlocEffectListenerBase].
   final Widget? child;
 
-  /// The [bloc] whose `effects` will be listened to.
+  /// The [bloc] or [Cubit] whose `effects` will be listened to.
   /// Whenever the [bloc] emits an effect, [listener] will be invoked.
   final B? bloc;
 
@@ -211,13 +211,8 @@ class _BlocEffectListenerBaseState<B extends BlocEffectEmitter<dynamic, E>, E>
   }
 
   void _subscribe() {
-    // We expect [B] to mix in `BlocEffectEmitter<_, _, E>` which exposes an
-    // `effects` stream. Since Dart does not allow us to express this
-    // relationship in the generic bound, we use `dynamic` and cast.
-    final dynamic blocWithEffects = _bloc;
-    final Stream<E> effectsStream = blocWithEffects.effects as Stream<E>;
-
-    _subscription = effectsStream.listen((effect) {
+    // Listen to the effects stream of the bloc/cubit and call the listener when an effect is emitted
+    _subscription = _bloc.effects.listen((effect) {
       if (!mounted) return;
       if (widget.listenWhen?.call(effect) ?? true) {
         widget.listener(context, effect);

@@ -5,7 +5,7 @@
 `flutter_bloc_effects` adds a simple pattern for modeling one‑off UI side effects (navigation, snackbars, dialogs, toasts, etc.) on top of `flutter_bloc`.  
 It gives you:
 
-- **`BlocEffectEmitter` mixin**: add an `effects` stream and `emitEffect` to any `Bloc`.
+- **`BlocEffectEmitter` mixin**: add an `effects` stream and `emitEffect` to any `Bloc` or `Cubit`.
 - **`BlocEffectListener` widget**: listen to the `effects` stream and run UI callbacks (similar to `BlocListener`, but for effects).
 - **`MultiBlocEffectListener` widget**: compose multiple `BlocEffectListener`s without deep nesting.
 
@@ -46,7 +46,7 @@ This package separates those into an **effect stream** that the UI can listen to
 
 ## Usage
 
-### 1. Add `BlocEffectEmitter` to your bloc
+### 1. Add `BlocEffectEmitter` to your bloc or cubit
 
 ```dart
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -71,10 +71,13 @@ class ShowLoginError extends LoginEffect {
   ShowLoginError(this.message);
   final String message;
 }
-class NavigateToHome extends LoginEffect {}
+class NavigateToHome extends LoginEffect {
+  NavigateToHome(this.username);
+  final String username;
+}
 
 class LoginBloc extends Bloc<LoginEvent, LoginState>
-    with BlocEffectEmitter<LoginEvent, LoginState, LoginEffect> {
+    with BlocEffectEmitter<LoginState, LoginEffect> {
   LoginBloc() : super(LoginInitial()) {
     on<LoginSubmitted>(_onLoginSubmitted);
   }
@@ -88,7 +91,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState>
     try {
       // TODO: perform login
       emit(LoginSuccess());
-      emitEffect(NavigateToHome());
+      emitEffect(NavigateToHome(event.username));
     } catch (e) {
       emit(LoginFailure());
       emitEffect(ShowLoginError('Login failed'));
@@ -101,6 +104,48 @@ The mixin:
 
 - Adds an `effects` stream: `Stream<LoginEffect> get effects`
 - Exposes `emitEffect(LoginEffect effect)` to push one‑off UI effects.
+
+#### Using with `Cubit`
+
+You can also use `BlocEffectEmitter` with `Cubit`:
+
+```dart
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc_effects/flutter_bloc_effects.dart';
+
+class CounterState {
+  const CounterState(this.count);
+  final int count;
+}
+
+sealed class CounterEffect {}
+class ShowMessage extends CounterEffect {
+  ShowMessage(this.message);
+  final String message;
+}
+
+class CounterCubit extends Cubit<CounterState>
+    with BlocEffectEmitter<CounterState, CounterEffect> {
+  CounterCubit() : super(const CounterState(0));
+
+  void increment() {
+    emit(CounterState(state.count + 1));
+    
+    // Emit an effect when count reaches 10
+    if (state.count == 10) {
+      emitEffect(ShowMessage('Congratulations! You reached 10!'));
+    }
+  }
+
+  void decrement() {
+    if (state.count > 0) {
+      emit(CounterState(state.count - 1));
+    } else {
+      emitEffect(ShowMessage('Cannot go below 0'));
+    }
+  }
+}
+```
 
 ---
 
@@ -121,8 +166,9 @@ class LoginPage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(message)),
               );
-            case NavigateToHome():
+            case NavigateToHome(:final username):
               Navigator.of(context).pushReplacementNamed('/home');
+              // username is available if needed
           }
         },
         child: const _LoginView(),
@@ -194,18 +240,18 @@ MultiBlocEffectListener(
 
 ## API Reference
 
-### `BlocEffectEmitter<Event, State, Effect>`
+### `BlocEffectEmitter<State, Effect>`
 
-Mixin for `Bloc<Event, State>` that adds:
+Mixin for `Bloc<Event, State>` or `Cubit<State>` that adds:
 
 - **`Stream<Effect> get effects`**: the effect stream.
 - **`void emitEffect(Effect effect)`**: push a new effect.
 
-### `BlocEffectListener<B extends Bloc, E>`
+### `BlocEffectListener<B extends StateStreamable, E>`
 
 Widget that:
 
-- Subscribes to `B.effects` (where `B` mixes in `BlocEffectEmitter<_, _, E>`).
+- Subscribes to `B.effects` (where `B` mixes in `BlocEffectEmitter<_, E>`).
 - Calls:
 
   ```dart
