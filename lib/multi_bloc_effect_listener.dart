@@ -50,7 +50,7 @@ import 'bloc_effect_listener.dart';
 /// improved readability due to the reduction in nesting and boilerplate.
 ///
 /// It is analogous to `MultiBlocListener` from `flutter_bloc` but works with
-/// effect listeners built on top of the `BlocEffect` mixin.
+/// effect listeners built on top of the `BlocEffectEmitter` mixin.
 /// {@endtemplate}
 class MultiBlocEffectListener extends MultiProvider {
   /// {@macro multi_bloc_effect_listener}

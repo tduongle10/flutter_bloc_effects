@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-mixin BlocEffect<State, Effect> on StateStreamableSource<State> {
+mixin BlocEffectEmitter<State, Effect> on StateStreamableSource<State> {
   final _effects = StreamController<Effect>();
 
   Stream<Effect> get effects => _effects.stream;

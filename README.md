@@ -5,7 +5,7 @@
 `flutter_bloc_effects` adds a simple pattern for modeling one‑off UI side effects (navigation, snackbars, dialogs, toasts, etc.) on top of `flutter_bloc`.  
 It gives you:
 
-- **`BlocEffect` mixin**: add an `effects` stream and `emitEffect` to any `Bloc`.
+- **`BlocEffectEmitter` mixin**: add an `effects` stream and `emitEffect` to any `Bloc`.
 - **`BlocEffectListener` widget**: listen to the `effects` stream and run UI callbacks (similar to `BlocListener`, but for effects).
 - **`MultiBlocEffectListener` widget**: compose multiple `BlocEffectListener`s without deep nesting.
 
@@ -46,7 +46,7 @@ This package separates those into an **effect stream** that the UI can listen to
 
 ## Usage
 
-### 1. Add `BlocEffect` to your bloc
+### 1. Add `BlocEffectEmitter` to your bloc
 
 ```dart
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -74,7 +74,7 @@ class ShowLoginError extends LoginEffect {
 class NavigateToHome extends LoginEffect {}
 
 class LoginBloc extends Bloc<LoginEvent, LoginState>
-    with BlocEffect<LoginEvent, LoginState, LoginEffect> {
+    with BlocEffectEmitter<LoginEvent, LoginState, LoginEffect> {
   LoginBloc() : super(LoginInitial()) {
     on<LoginSubmitted>(_onLoginSubmitted);
   }
@@ -194,7 +194,7 @@ MultiBlocEffectListener(
 
 ## API Reference
 
-### `BlocEffect<Event, State, Effect>`
+### `BlocEffectEmitter<Event, State, Effect>`
 
 Mixin for `Bloc<Event, State>` that adds:
 
@@ -205,7 +205,7 @@ Mixin for `Bloc<Event, State>` that adds:
 
 Widget that:
 
-- Subscribes to `B.effects` (where `B` mixes in `BlocEffect<_, _, E>`).
+- Subscribes to `B.effects` (where `B` mixes in `BlocEffectEmitter<_, _, E>`).
 - Calls:
 
   ```dart

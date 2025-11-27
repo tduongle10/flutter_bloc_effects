@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc_effects/bloc_effect_emitter.dart';
 import 'package:provider/single_child_widget.dart';
 
 /// Signature for the `listener` function which takes the [BuildContext] along
@@ -81,7 +82,7 @@ typedef BlocEffectListenerCondition<E> = bool Function(E effect);
 /// )
 /// ```
 /// {@endtemplate}
-class BlocEffectListener<B extends Bloc, E>
+class BlocEffectListener<B extends BlocEffectEmitter<dynamic, E>, E>
     extends BlocEffectListenerBase<B, E> {
   /// {@macro bloc_effect_listener}
   const BlocEffectListener({
@@ -94,12 +95,12 @@ class BlocEffectListener<B extends Bloc, E>
 }
 
 /// Base class for widgets that listen to effect emissions from a specified
-/// [Bloc] which mixes in the `BlocEffect` mixin.
+/// [Bloc] which mixes in the `BlocEffectEmitter` mixin.
 ///
 /// A [BlocEffectListenerBase] is stateful and maintains the effect
 /// subscription.
-abstract class BlocEffectListenerBase<B extends StateStreamableSource, E>
-    extends SingleChildStatefulWidget {
+abstract class BlocEffectListenerBase<B extends BlocEffectEmitter<dynamic, E>,
+    E> extends SingleChildStatefulWidget {
   const BlocEffectListenerBase({
     required this.listener,
     super.key,
@@ -150,7 +151,7 @@ abstract class BlocEffectListenerBase<B extends StateStreamableSource, E>
   }
 }
 
-class _BlocEffectListenerBaseState<B extends StateStreamableSource, E>
+class _BlocEffectListenerBaseState<B extends BlocEffectEmitter<dynamic, E>, E>
     extends SingleChildState<BlocEffectListenerBase<B, E>> {
   StreamSubscription<E>? _subscription;
   late B _bloc;
@@ -210,7 +211,7 @@ class _BlocEffectListenerBaseState<B extends StateStreamableSource, E>
   }
 
   void _subscribe() {
-    // We expect [B] to mix in `BlocEffect<_, _, E>` which exposes an
+    // We expect [B] to mix in `BlocEffectEmitter<_, _, E>` which exposes an
     // `effects` stream. Since Dart does not allow us to express this
     // relationship in the generic bound, we use `dynamic` and cast.
     final dynamic blocWithEffects = _bloc;

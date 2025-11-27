@@ -4,8 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_bloc_effects/flutter_bloc_effects.dart';
 
-class TestEvent {}
-
 class TestState {
   const TestState(this.value);
   final int value;
@@ -16,60 +14,68 @@ class TestEffect {
   final String message;
 }
 
-class TestBloc extends Bloc<TestEvent, TestState>
-    with BlocEffect<TestState, TestEffect> {
-  TestBloc() : super(const TestState(0)) {
-    on<TestEvent>((event, emit) {
-      emit(const TestState(1));
-      emitEffect(const TestEffect('effect-emitted'));
-    });
+class TestCubit extends Cubit<TestState>
+    with BlocEffectEmitter<TestState, TestEffect> {
+  TestCubit() : super(const TestState(0));
+
+  void emitTestEffect() {
+    emit(const TestState(1));
+    emitEffect(const TestEffect('effect-emitted'));
   }
 }
 
 void main() {
-  group('BlocEffect', () {
+  group('BlocEffectEmitter', () {
     test('emits effects via effects stream', () async {
-      final bloc = TestBloc();
+      final cubit = TestCubit();
 
-      // Trigger an effect.
-      bloc.add(TestEvent());
+      // Subscribe to effects stream before triggering
+      final effectFuture = cubit.effects.first;
 
-      final effect = await bloc.effects.first;
+      // Trigger an effect
+      cubit.emitTestEffect();
+
+      final effect = await effectFuture;
       expect(effect.message, 'effect-emitted');
 
-      await bloc.close();
+      await cubit.close();
     });
   });
 
   group('BlocEffectListener', () {
     testWidgets('invokes listener when effect is emitted', (tester) async {
-      final bloc = TestBloc();
+      final cubit = TestCubit();
       TestEffect? receivedEffect;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider<TestBloc>.value(
-            value: bloc,
-            child: BlocEffectListener<TestBloc, TestEffect>(
-              listener: (context, effect) {
-                receivedEffect = effect;
-              },
-              child: const SizedBox(),
+        BlocProvider<TestCubit>.value(
+          value: cubit,
+          child: MaterialApp(
+            home: Scaffold(
+              body: BlocEffectListener<TestCubit, TestEffect>(
+                listener: (context, effect) {
+                  receivedEffect = effect;
+                },
+                child: const SizedBox(),
+              ),
             ),
           ),
         ),
       );
 
-      // Trigger an effect.
-      bloc.add(TestEvent());
+      // Wait for widget tree to settle and listener to subscribe
+      await tester.pump();
 
-      // Allow the listener to be called.
+      // Trigger an effect
+      cubit.emitTestEffect();
+
+      // Wait for effect to propagate
       await tester.pump();
 
       expect(receivedEffect, isNotNull);
       expect(receivedEffect!.message, 'effect-emitted');
 
-      await bloc.close();
+      await cubit.close();
     });
   });
 }
