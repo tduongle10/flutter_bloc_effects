@@ -1,6 +1,6 @@
 name: flutter_bloc_effects
 description: "A lightweight companion to flutter_bloc that adds effect streams, listeners, and helpers for one-off UI side effects like navigation, snackbars, and dialogs."
-version: 0.1.0
+version: 0.2.0
 repository: "https://github.com/tduongle10/flutter_bloc_effects"
 
 environment:

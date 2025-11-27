@@ -17,7 +17,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_bloc_effects: ^0.1.0
+  flutter_bloc_effects: ^0.2.0
 
   flutter_bloc: ^9.1.1
   provider: ^6.1.5+1

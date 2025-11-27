@@ -1,3 +1,7 @@
+## 0.2.0
+
+- Update dependencies to latest compatible versions.
+
 ## 0.1.0
 
 - Initial public release of `flutter_bloc_effects`.
