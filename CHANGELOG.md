@@ -1,3 +1,7 @@
+## 1.0.1
+
+- Update dependencies to latest compatible versions.
+
 ## 1.0.0
 
 - **BREAKING**: Simplified `BlocEffectEmitter` signature from `BlocEffectEmitter<State, Effect>` to `BlocEffectEmitter<Effect>`.
