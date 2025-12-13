@@ -14,8 +14,7 @@ class TestEffect {
   final String message;
 }
 
-class TestCubit extends Cubit<TestState>
-    with BlocEffectEmitter<TestState, TestEffect> {
+class TestCubit extends Cubit<TestState> with BlocEffectEmitter<TestEffect> {
   TestCubit() : super(const TestState(0));
 
   void emitTestEffect() {

@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-mixin BlocEffectEmitter<State, Effect> on BlocBase<State> {
-  final _effects = StreamController<Effect>();
+mixin BlocEffectEmitter<Effect> on Closable {
+  final _effects = StreamController<Effect>.broadcast();
 
   Stream<Effect> get effects => _effects.stream;
 

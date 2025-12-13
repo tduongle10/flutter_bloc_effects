@@ -17,10 +17,10 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_bloc_effects: ^0.2.0
+  flutter_bloc_effects: ^1.0.0
 
-  flutter_bloc: ^9.1.1
-  provider: ^6.1.5+1
+  flutter_bloc: ^8.0.0
+  provider: ^6.0.0
 ```
 
 Then import it:
@@ -77,7 +77,7 @@ class NavigateToHome extends LoginEffect {
 }
 
 class LoginBloc extends Bloc<LoginEvent, LoginState>
-    with BlocEffectEmitter<LoginState, LoginEffect> {
+    with BlocEffectEmitter<LoginEffect> {
   LoginBloc() : super(LoginInitial()) {
     on<LoginSubmitted>(_onLoginSubmitted);
   }
@@ -118,14 +118,13 @@ class CounterState {
   final int count;
 }
 
-sealed class CounterEffect {}
-class ShowMessage extends CounterEffect {
-  ShowMessage(this.message);
+class CounterEffect {
+  const CounterEffect(this.message);
   final String message;
 }
 
 class CounterCubit extends Cubit<CounterState>
-    with BlocEffectEmitter<CounterState, CounterEffect> {
+    with BlocEffectEmitter<CounterEffect> {
   CounterCubit() : super(const CounterState(0));
 
   void increment() {
@@ -133,7 +132,7 @@ class CounterCubit extends Cubit<CounterState>
     
     // Emit an effect when count reaches 10
     if (state.count == 10) {
-      emitEffect(ShowMessage('Congratulations! You reached 10!'));
+      emitEffect(CounterEffect('Congratulations! You reached 10!'));
     }
   }
 
@@ -141,7 +140,7 @@ class CounterCubit extends Cubit<CounterState>
     if (state.count > 0) {
       emit(CounterState(state.count - 1));
     } else {
-      emitEffect(ShowMessage('Cannot go below 0'));
+      emitEffect(CounterEffect('Cannot go below 0'));
     }
   }
 }
@@ -240,18 +239,20 @@ MultiBlocEffectListener(
 
 ## API Reference
 
-### `BlocEffectEmitter<State, Effect>`
+### `BlocEffectEmitter<Effect>`
 
 Mixin for `Bloc<Event, State>` or `Cubit<State>` that adds:
 
 - **`Stream<Effect> get effects`**: the effect stream.
 - **`void emitEffect(Effect effect)`**: push a new effect.
 
-### `BlocEffectListener<B extends StateStreamable, E>`
+The mixin extends `Closable` and properly closes the effects stream when the bloc/cubit is closed.
+
+### `BlocEffectListener<B extends BlocEffectEmitter<E>, E>`
 
 Widget that:
 
-- Subscribes to `B.effects` (where `B` mixes in `BlocEffectEmitter<_, E>`).
+- Subscribes to `B.effects` (where `B` mixes in `BlocEffectEmitter<E>`).
 - Calls:
 
   ```dart
@@ -264,6 +265,7 @@ Options:
 
 - **`bloc`** *(optional)*: provide a specific bloc instance; otherwise it uses `BlocProvider` / `context.read<B>()`.
 - **`listenWhen`** *(optional)*: `bool Function(E effect)` to filter which effects should be delivered.
+- **`listener`**: required callback that handles the effect.
 - **`child`**: the subtree that will be rendered.
 
 ### `MultiBlocEffectListener`

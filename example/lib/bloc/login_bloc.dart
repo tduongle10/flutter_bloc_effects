@@ -6,7 +6,7 @@ import 'login_state.dart';
 import 'login_effect.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState>
-    with BlocEffectEmitter<LoginState, LoginEffect> {
+    with BlocEffectEmitter<LoginEffect> {
   LoginBloc() : super(LoginInitial()) {
     on<LoginSubmitted>(_onLoginSubmitted);
   }

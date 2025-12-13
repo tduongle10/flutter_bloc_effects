@@ -12,7 +12,7 @@ class CounterEffect {
 }
 
 class CounterCubit extends Cubit<CounterState>
-    with BlocEffectEmitter<CounterState, CounterEffect> {
+    with BlocEffectEmitter<CounterEffect> {
   CounterCubit() : super(const CounterState(0));
 
   void increment() {

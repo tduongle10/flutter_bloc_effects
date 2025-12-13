@@ -82,7 +82,7 @@ typedef BlocEffectListenerCondition<E> = bool Function(E effect);
 /// )
 /// ```
 /// {@endtemplate}
-class BlocEffectListener<B extends BlocEffectEmitter<dynamic, E>, E>
+class BlocEffectListener<B extends BlocEffectEmitter<E>, E>
     extends BlocEffectListenerBase<B, E> {
   /// {@macro bloc_effect_listener}
   const BlocEffectListener({
@@ -99,8 +99,8 @@ class BlocEffectListener<B extends BlocEffectEmitter<dynamic, E>, E>
 ///
 /// A [BlocEffectListenerBase] is stateful and maintains the effect
 /// subscription.
-abstract class BlocEffectListenerBase<B extends BlocEffectEmitter<dynamic, E>,
-    E> extends SingleChildStatefulWidget {
+abstract class BlocEffectListenerBase<B extends BlocEffectEmitter<E>, E>
+    extends SingleChildStatefulWidget {
   const BlocEffectListenerBase({
     required this.listener,
     super.key,
@@ -151,7 +151,7 @@ abstract class BlocEffectListenerBase<B extends BlocEffectEmitter<dynamic, E>,
   }
 }
 
-class _BlocEffectListenerBaseState<B extends BlocEffectEmitter<dynamic, E>, E>
+class _BlocEffectListenerBaseState<B extends BlocEffectEmitter<E>, E>
     extends SingleChildState<BlocEffectListenerBase<B, E>> {
   StreamSubscription<E>? _subscription;
   late B _bloc;
